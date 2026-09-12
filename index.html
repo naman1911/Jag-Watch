@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Jag Watch — the fleet, plotted</title>
+<meta name="description" content="Live AIS positions for the Jag fleet, plotted on a chart." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-view="chart">
+
+<header class="masthead">
+  <div class="title">
+    <h1>Jag Watch</h1>
+    <p class="subtitle">Every hull whose name begins <i>Jag</i>, plotted where she last reported.</p>
+  </div>
+  <div class="link" id="link">
+    <span class="lamp" id="lamp" aria-hidden="true"></span>
+    <span class="link-state" id="link-state">Opening the link</span>
+    <span class="link-detail" id="link-detail"></span>
+  </div>
+</header>
+
+<div id="sim-banner" class="sim-banner" hidden>
+  Simulated positions. No API key is set, so these hulls are invented — nothing here is a real ship.
+</div>
+
+<main class="table">
+
+  <section class="ledger" id="ledger-panel" aria-label="Fleet register">
+    <div class="ledger-head">
+      <h2>Register</h2>
+      <span class="count" id="fleet-count">0 hulls</span>
+    </div>
+    <ol class="ledger-rows" id="ledger"></ol>
+    <p class="empty" id="ledger-empty">
+      Nothing in the register yet. The watch is reading the traffic and will write down
+      every hull it hears whose name starts with <i>Jag</i>. First contact usually takes
+      a few minutes.
+    </p>
+  </section>
+
+  <section class="chart-wrap" aria-label="Chart">
+    <div id="chart"></div>
+    <div class="chart-legend">
+      <span><i class="key key-underway"></i>Under way</span>
+      <span><i class="key key-stopped"></i>Anchored or moored</span>
+      <span><i class="key key-dr"></i>Dead reckoning</span>
+    </div>
+    <button class="fit" id="fit" type="button">Fit the fleet</button>
+  </section>
+
+  <section class="log" id="log-panel" aria-label="Deck log">
+    <div class="log-head">
+      <h2>Deck log</h2>
+      <span class="count" id="log-count">all times UTC</span>
+    </div>
+    <ol class="log-rows" id="log"></ol>
+  </section>
+
+</main>
+
+<nav class="tabs" aria-label="View">
+  <button type="button" data-view="ledger">Register</button>
+  <button type="button" data-view="chart" class="on">Chart</button>
+  <button type="button" data-view="log">Log</button>
+</nav>
+
+<aside class="sheet" id="sheet" hidden aria-label="Vessel particulars">
+  <button class="sheet-close" id="sheet-close" type="button" aria-label="Close particulars">Close</button>
+  <div class="sheet-body" id="sheet-body"></div>
+</aside>
+
+<svg class="grain" aria-hidden="true" focusable="false">
+  <filter id="paper-grain">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#paper-grain)"/>
+</svg>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+/* Jag Watch
+   Palette taken from a British Admiralty paper chart: buff land, near-white
+   deep water, a pale shoal tint, and magenta reserved — as on the real thing —
+   for the things you are meant to look at. Courses are ruled in pencil grey. */
+
+:root {
+  --paper:   #f1e6c8;
+  --paper-2: #e7d9b4;
+  --sea:     #fcfaf1;
+  --shoal:   #bfdade;
+  --ink:     #13303d;
+  --ink-2:   #5d7883;
+  --ink-3:   #90a5ad;
+  --magenta: #bd0066;
+  --pencil:  #47555e;
+  --rule:    rgba(19, 48, 61, 0.16);
+  --rule-2:  rgba(19, 48, 61, 0.07);
+
+  --ledger-w: 19rem;
+  --log-h: 12rem;
+
+  --sans: 'Barlow Condensed', 'Helvetica Neue', sans-serif;
+  --serif: 'Newsreader', Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  overflow: hidden;
+}
+
+h1, h2 { margin: 0; font-weight: 500; }
+
+/* --- masthead ---------------------------------------------------------- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.7rem 1.1rem 0.6rem;
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.masthead h1 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.6rem;
+  letter-spacing: 0.005em;
+  line-height: 1;
+}
+
+.subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  max-width: 46ch;
+}
+
+.subtitle i { font-family: var(--serif); font-size: 0.95em; }
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.link-detail { color: var(--ink-3); }
+
+.lamp {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--ink-3);
+  box-shadow: 0 0 0 3px rgba(189, 0, 102, 0);
+}
+
+.lamp[data-state="live"]  { background: var(--magenta); animation: pulse 3.2s infinite; }
+.lamp[data-state="warn"]  { background: #c8791b; }
+.lamp[data-state="down"]  { background: var(--ink-3); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(189, 0, 102, 0.35); }
+  50%      { box-shadow: 0 0 0 5px rgba(189, 0, 102, 0); }
+}
+
+.sim-banner {
+  padding: 0.45rem 1.1rem;
+  background: var(--magenta);
+  color: #fff;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
+
+/* --- the table --------------------------------------------------------- */
+
+.table {
+  display: grid;
+  grid-template-columns: var(--ledger-w) 1fr;
+  grid-template-rows: 1fr var(--log-h);
+  grid-template-areas:
+    "ledger chart"
+    "ledger log";
+  min-height: 0;
+}
+
+.ledger    { grid-area: ledger; border-right: 1px solid var(--ink); }
+.chart-wrap{ grid-area: chart; position: relative; }
+.log       { grid-area: log; border-top: 1px solid var(--ink); }
+
+.ledger, .log {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--paper);
+}
+
+.ledger-head, .log-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.5rem 0.9rem 0.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ledger-head h2, .log-head h2 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.count { font-size: 0.88rem; color: var(--ink-3); letter-spacing: 0.05em; }
+
+/* --- register ---------------------------------------------------------- */
+
+.ledger-rows, .log-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: thin;
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--rule-2);
+  cursor: pointer;
+  background: none;
+  border-left: 3px solid transparent;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.ledger-row:hover, .ledger-row:focus-visible { background: var(--paper-2); }
+.ledger-row[aria-current="true"] { border-left-color: var(--magenta); background: var(--paper-2); }
+
+.ledger-row .ship {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.06rem;
+  line-height: 1.15;
+}
+
+.ledger-row .speed {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.02rem;
+  letter-spacing: 0.02em;
+}
+
+.ledger-row .where {
+  grid-column: 1 / -1;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  letter-spacing: 0.03em;
+}
+
+.ledger-row.is-stale { opacity: 0.55; }
+.ledger-row.is-stale .where::after { content: ' — silent'; color: var(--ink-3); }
+
+.empty {
+  margin: 0;
+  padding: 1rem 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+.empty i { font-family: var(--serif); }
+
+/* --- chart ------------------------------------------------------------- */
+
+#chart {
+  position: absolute;
+  inset: 0;
+  background: var(--sea);
+}
+
+/* Push commodity map tiles toward chart paper. */
+.leaflet-tile-pane {
+  filter: sepia(0.62) saturate(0.62) hue-rotate(-6deg) brightness(1.05) contrast(0.88);
+}
+
+.leaflet-container {
+  background: var(--sea);
+  font-family: var(--sans);
+}
+
+.leaflet-control-attribution {
+  background: rgba(252, 250, 241, 0.82) !important;
+  color: var(--ink-2) !important;
+  font-family: var(--sans);
+  font-size: 0.8rem !important;
+}
+
+.leaflet-control-attribution a { color: var(--ink-2) !important; }
+
+.chart-legend {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 500;
+  display: flex;
+  gap: 0.9rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba(252, 250, 241, 0.9);
+  border: 1px solid var(--rule);
+  font-size: 0.88rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-2);
+}
+
+.chart-legend span { display: flex; align-items: center; gap: 0.3rem; }
+
+.key { width: 0.7rem; height: 0.7rem; display: inline-block; }
+.key-underway { background: var(--magenta); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.key-stopped  { border: 1.5px solid var(--ink); border-radius: 50%; }
+.key-dr       { border: 1.5px dashed var(--magenta); border-radius: 50%; }
+
+.fit {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.75rem;
+  z-index: 500;
+  padding: 0.35rem 0.7rem;
+  background: rgba(252, 250, 241, 0.94);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.fit:hover { background: var(--paper-2); }
+
+/* Vessel symbols */
+
+.vessel-icon { will-change: transform; }
+.vessel-icon svg { display: block; overflow: visible; }
+.hull { fill: var(--magenta); stroke: none; }
+.hull-stopped { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.hull-dr { fill: none; stroke: var(--magenta); stroke-width: 1.4; stroke-dasharray: 2.5 2; }
+.vector { stroke: var(--magenta); stroke-width: 1.3; }
+
+.vessel-label {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: rgba(252, 250, 241, 0.95);
+  stroke-width: 3px;
+}
+
+.course-line {
+  stroke: var(--pencil);
+  stroke-width: 1.1;
+  fill: none;
+  opacity: 0.65;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: rule-in 1.5s ease-out forwards;
+}
+
+.course-dr { stroke: var(--magenta); stroke-dasharray: 3 3; opacity: 0.8; animation: none; }
+
+@keyframes rule-in { to { stroke-dashoffset: 0; } }
+
+/* --- deck log ---------------------------------------------------------- */
+
+.log-row {
+  display: grid;
+  grid-template-columns: 3.6rem 1fr;
+  gap: 0.55rem;
+  padding: 0.32rem 0.9rem;
+  border-bottom: 1px solid var(--rule-2);
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.log-row .time {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+}
+
+.log-row .ship {
+  font-family: var(--serif);
+  font-style: italic;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 2px;
+}
+
+.log-row .ship:hover { text-decoration-color: var(--magenta); }
+.log-row[data-kind="register"] .time { color: var(--magenta); }
+
+/* --- particulars sheet ------------------------------------------------- */
+
+.sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(25rem, 100vw);
+  z-index: 900;
+  background: var(--sea);
+  border-left: 1px solid var(--ink);
+  box-shadow: -14px 0 28px rgba(19, 48, 61, 0.1);
+  overflow-y: auto;
+  padding: 1rem 1.2rem 2.5rem;
+  animation: slide-in 0.22s ease-out;
+}
+
+@keyframes slide-in { from { transform: translateX(14px); opacity: 0; } }
+
+.sheet-close {
+  float: right;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+}
+
+.sheet-close:hover { border-color: var(--ink); color: var(--ink); }
+
+.sheet h3 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.7rem;
+  margin: 0 0 0.1rem;
+  line-height: 1.05;
+}
+
+.sheet .flagline {
+  margin: 0 0 0.9rem;
+  color: var(--ink-2);
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.fixline {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 0.8rem;
+}
+
+.fixline small { display: block; font-size: 0.86rem; color: var(--ink-3); letter-spacing: 0.06em; }
+
+.particulars {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0.05rem 0.7rem;
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.particulars dt { color: var(--ink-3); letter-spacing: 0.04em; }
+.particulars dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+.sheet h4 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.05rem;
+  margin: 1.1rem 0 0.35rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.dr-note {
+  font-size: 0.92rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+  margin: 0.4rem 0 0;
+}
+
+/* --- tabs (small screens) ---------------------------------------------- */
+
+.tabs { display: none; }
+
+@media (max-width: 860px) {
+  :root { --log-h: auto; }
+
+  .masthead { flex-direction: column; align-items: flex-start; gap: 0.3rem; padding: 0.6rem 0.9rem; }
+  .subtitle { font-size: 0.9rem; }
+
+  .table {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "chart";
+  }
+
+  .ledger, .chart-wrap, .log { grid-area: chart; }
+  .ledger { border-right: none; }
+  .log { border-top: none; }
+
+  body[data-view="chart"]  .ledger,
+  body[data-view="chart"]  .log,
+  body[data-view="ledger"] .chart-wrap,
+  body[data-view="ledger"] .log,
+  body[data-view="log"]    .chart-wrap,
+  body[data-view="log"]    .ledger { display: none; }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--ink);
+    background: var(--paper);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tabs button {
+    padding: 0.65rem 0;
+    background: none;
+    border: none;
+    border-right: 1px solid var(--rule-2);
+    font: inherit;
+    font-size: 1.02rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+
+  .tabs button:last-child { border-right: none; }
+  .tabs button.on { color: var(--magenta); box-shadow: inset 0 2px 0 var(--magenta); }
+
+  .sheet { width: 100vw; border-left: none; }
+  .chart-legend { font-size: 0.8rem; gap: 0.6rem; }
+}
+
+/* --- paper grain ------------------------------------------------------- */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  z-index: 1000;
+}
+
+/* --- quality floor ----------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--magenta);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .course-line { stroke-dashoffset: 0; }
+}
