@@ -26,9 +26,9 @@ export class Chart {
       attributionControl: true,
     }).setView([15, 68], 4);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      attribution: '&copy; OpenStreetMap contributors, &copy; CARTO &middot; AIS via aisstream.io',
+      attribution: '&copy; OpenStreetMap contributors &middot; AIS via aisstream.io',
     }).addTo(this.map);
 
     this.graticule();
