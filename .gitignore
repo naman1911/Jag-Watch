@@ -1,0 +1,5 @@
+node_modules/
+.env
+data/fleet.json
+*.log
+.DS_Store
